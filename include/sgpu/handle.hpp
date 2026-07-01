@@ -19,8 +19,16 @@ namespace sgpu
             }
         }
 
+        handle(const handle& other) : m_ptr(other.m_ptr)
+        {
+            if (m_ptr)
+            {
+                resource_add_ref(m_ptr);
+            }
+        }
+
         template<class U>
-            requires std::is_convertible_v<U*, T*>
+            requires std::is_convertible_v<U*, T*> && !std::is_same_v<U, T>
         handle(const handle<U>& other) : m_ptr(other.m_ptr)
         {
             if (m_ptr)
