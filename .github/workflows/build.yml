@@ -1,0 +1,62 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ubuntu-gcc
+            os: ubuntu-latest
+            cc: gcc
+            cxx: g++
+            install_linux_dependencies: true
+          - name: ubuntu-clang
+            os: ubuntu-latest
+            cc: clang
+            cxx: clang++
+            install_linux_dependencies: true
+          - name: macos-clang
+            os: macos-latest
+            cc: clang
+            cxx: clang++
+            install_linux_dependencies: false
+          - name: windows-msvc
+            os: windows-latest
+            install_linux_dependencies: false
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Install SDL
+        id: sdl
+        uses: libsdl-org/setup-sdl@main
+        with:
+          version: 3.4.10
+          install-linux-dependencies: ${{ matrix.install_linux_dependencies }}
+
+      - name: Configure
+        shell: bash
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="${{ steps.sdl.outputs.prefix }}"
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
