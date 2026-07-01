@@ -6,6 +6,7 @@
 #include "sgpu/compute_pass.hpp"
 
 #include <cassert>
+#include <functional>
 
 namespace sgpu
 {
@@ -59,7 +60,7 @@ namespace sgpu
         {
             assert(!m_pass_in_progress && "A pass already in progress");
             m_pass_in_progress = true;
-            m_tracked_resources.append_range(color_target_textures);
+            m_tracked_resources.insert(m_tracked_resources.end(), color_target_textures.begin(), color_target_textures.end());
             m_tracked_resources.emplace_back(depth_stencil_target_texture);
             auto pass = render_pass{
                 SDL_BeginGPURenderPass(m_command_buffer, color_targets.data(), color_targets.size(),
@@ -125,3 +126,4 @@ namespace sgpu
         bool m_has_swapchain_texture;
     };
 }
+
