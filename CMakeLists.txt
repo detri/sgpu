@@ -3,7 +3,9 @@ project(sgpu VERSION 0.1.0 LANGUAGES CXX)
 
 set(DETRI_SDL_VENDORED OFF CACHE BOOL "Whether to vendor SDL")
 
-find_package(SDL3 CONFIG QUIET)
+if(NOT TARGET SDL3::SDL3)
+    find_package(SDL3 CONFIG QUIET)
+endif()
 
 if(NOT TARGET SDL3::SDL3 AND (PROJECT_IS_TOP_LEVEL OR DETRI_SDL_VENDORED))
     include(FetchContent)
@@ -64,4 +66,3 @@ target_sources(sgpu PUBLIC FILE_SET HEADERS
 
 # sgpu does not hide SDL3 because it only wraps part of it
 target_link_libraries(sgpu PUBLIC SDL3::SDL3)
-
